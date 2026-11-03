@@ -135,6 +135,7 @@ export type ParticipantState =
       question: PublicQuestion;
       question_started_at: string | null;
       quiz_deadline?: string | null;
+      quiz_duration_seconds?: number | null;
       answered: boolean;
       feedback: Feedback | null;
       leaderboard?: LeaderRow[] | null;

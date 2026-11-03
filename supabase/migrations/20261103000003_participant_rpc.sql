@@ -699,6 +699,7 @@ begin
     'question', public._question_public(v_qid, v_seed),
     'question_started_at', v_started,
     'quiz_deadline', v_deadline,
+    'quiz_duration_seconds', v_quiz.duration_seconds,
     'answered', v_answered,
     'feedback', case when v_answered
       then public._answer_feedback(v_p.id, v_qid, v_quiz.show_correct_immediately) end,

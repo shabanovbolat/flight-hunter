@@ -88,3 +88,14 @@ state through the RPC (plus a slow polling fallback). Timers use server time
   Islamic reference block (shown verbatim), reorder/duplicate/delete,
   question bank with search + type filter. Question + options are saved
   atomically by `save_question()` (security invoker → RLS applies).
+
+## Phase 5 — Participant flow ✅
+* Done: `/q/[slug]` landing (name, PIN, schedule/full/empty states),
+  anonymous sign-in inside the join Server Action, one-question-at-a-time
+  player (progress bar, "3 / 10", server-timed countdowns, big tap targets,
+  sticky submit that locks on first tap), feedback (correct/incorrect,
+  correct answer, explanation, reference verbatim), resume on refresh,
+  result (score, accuracy, time, rank, top-10, answer review), public
+  leaderboard page, offline banner.
+* Tests: `tests/e2e/participant.mjs` (mobile Playwright): per-question
+  network leak check, refresh-resume, double-tap → exactly one row each.
