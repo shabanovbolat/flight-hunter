@@ -178,16 +178,17 @@ create policy categories_update on public.quiz_categories for update to authenti
 create policy categories_delete on public.quiz_categories for delete to authenticated
   using (public.is_super_admin() or (public.is_staff() and created_by = auth.uid()));
 
--- quizzes: owner (creator) or super admin
+-- quizzes: owner (creator) or super admin. Checked on the row itself (not via
+-- owns_quiz(id)) so INSERT ... RETURNING can see the freshly inserted row.
 create policy quizzes_select on public.quizzes for select to authenticated
-  using (public.owns_quiz(id));
+  using (public.is_super_admin() or (owner_id = auth.uid() and public.is_staff()));
 create policy quizzes_insert on public.quizzes for insert to authenticated
   with check (public.is_staff() and owner_id = auth.uid());
 create policy quizzes_update on public.quizzes for update to authenticated
-  using (public.owns_quiz(id))
+  using (public.is_super_admin() or (owner_id = auth.uid() and public.is_staff()))
   with check (public.is_super_admin() or (public.is_staff() and owner_id = auth.uid()));
 create policy quizzes_delete on public.quizzes for delete to authenticated
-  using (public.owns_quiz(id));
+  using (public.is_super_admin() or (owner_id = auth.uid() and public.is_staff()));
 
 -- questions / options: only through the owning quiz
 create policy questions_all on public.questions for all to authenticated

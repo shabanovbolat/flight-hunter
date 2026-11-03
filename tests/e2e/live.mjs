@@ -78,7 +78,7 @@ for (let i = 1; i <= 5; i++) {
 for (const p of players) await p.getByText("Сіздің нәтижеңіз").waitFor({ timeout: 15000 });
 check(true, "both participants see final result after host ends");
 await host.getByText("Қорытынды нәтижелер").waitFor();
-check(sql(`select count(*) from quiz_results r join quiz_sessions s on s.id = r.session_id where s.quiz_id = '${QUIZ}' and s.ended_at > now() - interval '5 minutes'`) === "2", "2 results stored for the session");
+check(sql(`select count(*) from quiz_results where session_id = (select id from quiz_sessions where quiz_id = '${QUIZ}' order by created_at desc limit 1)`) === "2", "2 results stored for the session");
 await host.screenshot({ path: process.env.SHOT ?? "/tmp/host.png" });
 await browser.close();
 console.log("E2E LIVE PASSED");

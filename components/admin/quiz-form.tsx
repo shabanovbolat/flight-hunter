@@ -50,6 +50,12 @@ export function QuizForm({
     setMounted(true);
   }, [quiz?.starts_at, quiz?.ends_at]);
 
+  useEffect(() => {
+    // hard navigation after create (see question-form for why)
+    if (state?.redirectTo) window.location.assign(state.redirectTo);
+    else if (state?.saved) setTimeout(() => window.location.reload(), 800);
+  }, [state]);
+
   const err = state?.fieldErrors ?? {};
 
   return (
@@ -168,7 +174,7 @@ export function QuizForm({
       {state?.saved ? <Alert variant="success">{kk.common.saved}</Alert> : null}
 
       <div className="flex justify-end">
-        <Button type="submit" size="lg" disabled={pending}>
+        <Button type="submit" size="lg" disabled={pending || !mounted}>
           {pending ? kk.common.saving : quiz ? kk.common.save : kk.common.create}
         </Button>
       </div>

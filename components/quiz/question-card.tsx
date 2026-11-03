@@ -61,6 +61,7 @@ export function QuestionCard({
           maxLength={1000}
           autoComplete="off"
           enterKeyHint="send"
+          dir="auto"
         />
       ) : (
         <div className={cn("grid gap-3", big && question.options.length > 2 && "sm:grid-cols-2")}>

@@ -117,3 +117,29 @@ state through the RPC (plus a slow polling fallback). Timers use server time
   Join routes into live automatically if a session opened after page load.
 * Tests: `tests/e2e/live.mjs` — host + 2 phones, full 5-question quiz,
   reloads in lobby and mid-question, Realtime connection asserted.
+
+## Phase 8 — Leaderboards, statistics, exports ✅
+* Done: per-quiz results (filter: all / self-paced / each live session),
+  standard competition ranking (`lib/ranking.ts`, unit-tested 1,1,3),
+  medals, delete participant, public final leaderboard, results overview
+  (quiz history), participants page, statistics (participants, completion
+  rate, average score, correct/incorrect ratio, hardest questions, most
+  common wrong answers incl. normalised text answers, per-question rate),
+  CSV (UTF-8 BOM, formula-injection safe) and XLSX (results + questions
+  sheets). Settings: profile, password, categories, super-admin creator
+  management (service role, server-only) and role changes.
+
+## Phase 9 — Test pass ✅ (see README checklist)
+Bugs found and fixed:
+* RLS: `INSERT … RETURNING` on quizzes failed (policy looked the row up by id
+  through a STABLE function that can't see the new row) → policies check
+  `owner_id` directly; DB test added.
+* Next 15.5.x production client router intermittently aborts the refresh /
+  navigation that follows a server action (not in dev; 15.4.11 is fine but
+  has critical advisories, so 15.5.28 is pinned). Admin mutations now
+  reload / hard-navigate after success; participant and host screens never
+  depended on the router. Admin submit buttons stay disabled until hydrated.
+* Unlinked labels in the question reference section (a11y) fixed.
+* Arabic free-text answers now render with `dir="auto"`.
+* Security hardening: image optimizer disabled (no sharp), security headers,
+  postcss override; `xlsx` advisory remains (write-only usage).

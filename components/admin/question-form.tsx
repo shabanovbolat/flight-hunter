@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { BookOpen, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Field } from "@/components/ui/label";
 import { Alert } from "@/components/ui/feedback";
 import { ImageUpload } from "@/components/admin/image-upload";
 import { saveQuestion } from "@/lib/actions/question";
+import { useHydrated } from "@/lib/use-hydrated";
 import type { AnswerOption, Question, QuestionType, ReferenceType } from "@/lib/types";
 import { kk } from "@/lib/i18n/kk";
 import { cn } from "@/lib/utils";
@@ -48,7 +49,8 @@ export function QuestionForm({
   options?: AnswerOption[];
 }) {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const hydrated = useHydrated();
+  const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -123,16 +125,24 @@ export function QuestionForm({
           : opts.map((o) => ({ id: o.id, text: o.text, arabic_text: o.arabic_text, is_correct: o.is_correct })),
       ...ref,
     };
-    startTransition(async () => {
-      const res = await saveQuestion(question?.id ?? null, payload);
+    setPending(true);
+    void (async () => {
+      const res = await saveQuestion(question?.id ?? null, payload).catch(() => null);
+      if (!res) {
+        setPending(false);
+        setError(kk.errors.network);
+        return;
+      }
       if (!res.ok) {
+        setPending(false);
         setError(res.error);
         setErrors(res.fieldErrors ?? {});
         return;
       }
-      router.push(`/admin/quizzes/${quizId}`);
-      router.refresh();
-    });
+      // Full navigation: the soft router occasionally drops navigations that
+      // follow a server action (Next 15), a hard load is always reliable here.
+      window.location.assign(`/admin/quizzes/${quizId}`);
+    })();
   }
 
   const optionsError = errors.options ?? Object.entries(errors).find(([k]) => k.startsWith("options."))?.[1];
@@ -274,34 +284,34 @@ export function QuestionForm({
         </CardHeader>
         {showRef && (
           <CardContent className="grid gap-5 sm:grid-cols-2">
-            <Field label={f.arabicOriginal} className="sm:col-span-2">
-              <ArabicTextarea value={ref.arabic_original} onChange={(e) => setRef({ ...ref, arabic_original: e.target.value })} />
+            <Field label={f.arabicOriginal} htmlFor="ref-arabicOriginal" className="sm:col-span-2">
+              <ArabicTextarea id="ref-arabicOriginal" value={ref.arabic_original} onChange={(e) => setRef({ ...ref, arabic_original: e.target.value })} />
             </Field>
-            <Field label={f.kazakhTranslation} className="sm:col-span-2">
-              <Textarea value={ref.kazakh_translation} onChange={(e) => setRef({ ...ref, kazakh_translation: e.target.value })} />
+            <Field label={f.kazakhTranslation} htmlFor="ref-kazakhTranslation" className="sm:col-span-2">
+              <Textarea id="ref-kazakhTranslation" value={ref.kazakh_translation} onChange={(e) => setRef({ ...ref, kazakh_translation: e.target.value })} />
             </Field>
-            <Field label={f.referenceType}>
-              <Select value={ref.reference_type} onChange={(e) => setRef({ ...ref, reference_type: e.target.value as ReferenceType | "" })}>
+            <Field label={f.referenceType} htmlFor="ref-referenceType">
+              <Select id="ref-referenceType" value={ref.reference_type} onChange={(e) => setRef({ ...ref, reference_type: e.target.value as ReferenceType | "" })}>
                 <option value="">{kk.common.none}</option>
                 <option value="quran">{f.referenceTypes.quran}</option>
                 <option value="hadith">{f.referenceTypes.hadith}</option>
                 <option value="other">{f.referenceTypes.other}</option>
               </Select>
             </Field>
-            <Field label={f.bookName}>
-              <Input value={ref.book_name} onChange={(e) => setRef({ ...ref, book_name: e.target.value })} maxLength={300} />
+            <Field label={f.bookName} htmlFor="ref-bookName">
+              <Input id="ref-bookName" value={ref.book_name} onChange={(e) => setRef({ ...ref, book_name: e.target.value })} maxLength={300} />
             </Field>
-            <Field label={f.chapter}>
-              <Input value={ref.chapter} onChange={(e) => setRef({ ...ref, chapter: e.target.value })} maxLength={300} />
+            <Field label={f.chapter} htmlFor="ref-chapter">
+              <Input id="ref-chapter" value={ref.chapter} onChange={(e) => setRef({ ...ref, chapter: e.target.value })} maxLength={300} />
             </Field>
-            <Field label={f.referenceNumber}>
-              <Input value={ref.reference_number} onChange={(e) => setRef({ ...ref, reference_number: e.target.value })} maxLength={100} />
+            <Field label={f.referenceNumber} htmlFor="ref-referenceNumber">
+              <Input id="ref-referenceNumber" value={ref.reference_number} onChange={(e) => setRef({ ...ref, reference_number: e.target.value })} maxLength={100} />
             </Field>
-            <Field label={f.sourceAttribution} className="sm:col-span-2">
-              <Input value={ref.source_attribution} onChange={(e) => setRef({ ...ref, source_attribution: e.target.value })} maxLength={300} />
+            <Field label={f.sourceAttribution} htmlFor="ref-sourceAttribution" className="sm:col-span-2">
+              <Input id="ref-sourceAttribution" value={ref.source_attribution} onChange={(e) => setRef({ ...ref, source_attribution: e.target.value })} maxLength={300} />
             </Field>
-            <Field label={f.extraExplanation} className="sm:col-span-2">
-              <Textarea value={ref.extra_explanation} onChange={(e) => setRef({ ...ref, extra_explanation: e.target.value })} />
+            <Field label={f.extraExplanation} htmlFor="ref-extraExplanation" className="sm:col-span-2">
+              <Textarea id="ref-extraExplanation" value={ref.extra_explanation} onChange={(e) => setRef({ ...ref, extra_explanation: e.target.value })} />
             </Field>
           </CardContent>
         )}
@@ -312,7 +322,7 @@ export function QuestionForm({
         <Button type="button" variant="outline" onClick={() => router.back()}>
           {kk.common.cancel}
         </Button>
-        <Button type="submit" size="lg" disabled={pending}>
+        <Button type="submit" size="lg" disabled={pending || !hydrated}>
           {pending ? kk.common.saving : kk.common.save}
         </Button>
       </div>

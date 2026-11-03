@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "node --test --experimental-strip-types lib/**/*.test.ts",
+    "test": "node --test --experimental-strip-types \"lib/**/*.test.ts\"",
     "test:db": "psql \"${DB_URL:-postgresql://postgres:postgres@127.0.0.1:54322/postgres}\" -qAt -f supabase/tests/db_test.sql",
     "db:types": "supabase gen types typescript --local > lib/supabase/database.types.ts"
   },
@@ -41,5 +41,8 @@
     "eslint-config-next": "15.5.28",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "overrides": {
+    "postcss": "^8.5.32"
   }
 }

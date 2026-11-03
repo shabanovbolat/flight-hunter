@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireStaff } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -10,7 +9,9 @@ import { kk } from "@/lib/i18n/kk";
 import { rpcErrorMessage } from "@/lib/rpc";
 import type { ActionResult } from "@/lib/types";
 
-export type QuizFormState = { error?: string; fieldErrors?: Record<string, string>; saved?: boolean } | undefined;
+export type QuizFormState =
+  | { error?: string; fieldErrors?: Record<string, string>; saved?: boolean; redirectTo?: string }
+  | undefined;
 
 function parseQuizForm(formData: FormData) {
   const raw = Object.fromEntries(formData.entries());
@@ -51,6 +52,7 @@ export async function createQuiz(_prev: QuizFormState, formData: FormData): Prom
     .single();
   if (error) {
     if (error.code === "23505") return { fieldErrors: { slug: kk.quiz.validation.slugTaken } };
+    console.error("createQuiz failed", error.code, error.message);
     return { error: kk.common.unknownError };
   }
   if (parsed.data.pin) {
@@ -58,7 +60,7 @@ export async function createQuiz(_prev: QuizFormState, formData: FormData): Prom
     if (pinError) return { error: rpcErrorMessage(pinError) };
   }
   revalidatePath("/admin/quizzes");
-  redirect(`/admin/quizzes/${data.id}`);
+  return { redirectTo: `/admin/quizzes/${data.id}` };
 }
 
 export async function updateQuiz(quizId: string, _prev: QuizFormState, formData: FormData): Promise<QuizFormState> {
@@ -119,7 +121,7 @@ export async function deleteQuiz(quizId: string): Promise<ActionResult> {
   const { data, error } = await supabase.from("quizzes").delete().eq("id", quizId).select("id");
   if (error || !data?.length) return { ok: false, error: kk.common.unknownError };
   revalidatePath("/admin/quizzes");
-  redirect("/admin/quizzes");
+  return { ok: true, data: undefined };
 }
 
 export async function createCategory(_prev: unknown, formData: FormData): Promise<ActionResult<{ id: string; name: string }>> {

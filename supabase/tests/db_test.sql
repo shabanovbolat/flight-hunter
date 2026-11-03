@@ -34,6 +34,11 @@ select pg_temp.assert(
 select pg_temp.as_user('22222222-2222-4222-8222-222222222222');
 insert into public.quizzes (id, owner_id, slug, title) values
   ('55555555-5555-4555-8555-555555555555', '22222222-2222-4222-8222-222222222222', 'creator-quiz', 'Creator quiz');
+do $$ declare v uuid; begin
+  insert into public.quizzes (owner_id, slug, title)
+  values ('22222222-2222-4222-8222-222222222222', 'creator-quiz-2', 'Second') returning id into v;
+  perform pg_temp.assert(v is not null, 'creator insert ... returning works under RLS');
+end $$;
 select pg_temp.assert(
   (select count(*) from public.quizzes where slug = 'demo-quiz') = 0,
   'creator cannot read another creator''s quiz');
@@ -183,7 +188,7 @@ end $$;
 
 -- late answers score zero (simulate timer started long ago)
 insert into t_ctx (pid) select public.join_quiz('demo-quiz', 'Кешіккен', null);
-select public.get_participant_state((select pid from t_ctx order by pid limit 1 offset 0)) is not null;
+select public.get_participant_state((select id from public.participants where user_id = auth.uid())) is not null;
 select pg_temp.as_postgres();
 update public.participants set current_question_started_at = now() - interval '10 minutes'
  where user_id = 'aaaaaaaa-0000-4000-8000-000000000002';
