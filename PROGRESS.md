@@ -143,3 +143,17 @@ Bugs found and fixed:
 * Arabic free-text answers now render with `dir="auto"`.
 * Security hardening: image optimizer disabled (no sharp), security headers,
   postcss override; `xlsx` advisory remains (write-only usage).
+
+## Phase 10 — Deployment guide ✅
+* README: structure, migrations, security model, env vars, local dev,
+  Supabase cloud + Vercel steps (anonymous sign-ins, anonymous rate limit
+  for shared Wi-Fi, first super admin, Realtime plan sizing), checklist.
+* Load test (`tests/load/live-300.mjs`): 300 participants, 3 live rounds →
+  300/300 answers stored each round, ~2.4 ms DB time per RPC. Realtime is
+  capped at 200 connections on the local stack / Supabase Free; the client's
+  polling fallback covers the rest. Recommend Supabase Pro for 300+.
+
+### Remaining / known issues
+* Next 15.5 soft-router bug worked around with reloads in admin.
+* `xlsx` npm advisory (write-only use).
+* CSV verified programmatically (BOM + UTF-8), not in a real Excel install.
