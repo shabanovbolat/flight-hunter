@@ -47,12 +47,8 @@ export function QuizPlayer({ quiz }: { quiz: PublicQuiz }) {
       return (
         <Landing
           quiz={quiz}
-          onJoined={(participantId) =>
-            setView(
-              quiz.live_session
-                ? { kind: "live", participantId, sessionId: quiz.live_session.id }
-                : { kind: "self", participantId },
-            )
+          onJoined={(participantId, sessionId) =>
+            setView(sessionId ? { kind: "live", participantId, sessionId } : { kind: "self", participantId })
           }
         />
       );

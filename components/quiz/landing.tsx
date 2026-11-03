@@ -17,7 +17,7 @@ import { formatDate } from "@/lib/utils";
 
 const NAME_KEY = "ilim:name";
 
-export function Landing({ quiz, onJoined }: { quiz: PublicQuiz; onJoined: (participantId: string) => void }) {
+export function Landing({ quiz, onJoined }: { quiz: PublicQuiz; onJoined: (participantId: string, sessionId: string | null) => void }) {
   const p = kk.participant;
   const [name, setName] = useState("");
   const [pin, setPin] = useState("");
@@ -55,7 +55,7 @@ export function Landing({ quiz, onJoined }: { quiz: PublicQuiz; onJoined: (parti
       } catch {
         /* ignore */
       }
-      onJoined(res.data.participantId);
+      onJoined(res.data.participantId, res.data.sessionId);
     });
   }
 

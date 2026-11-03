@@ -99,3 +99,21 @@ state through the RPC (plus a slow polling fallback). Timers use server time
   leaderboard page, offline banner.
 * Tests: `tests/e2e/participant.mjs` (mobile Playwright): per-question
   network leak check, refresh-resume, double-tap → exactly one row each.
+
+## Phase 6 — QR, PNG, poster ✅
+* Done: share page (inline SVG QR, link + copy/open), PNG download route
+  (`/admin/quizzes/[id]/qr.png`, RLS-checked, 1200px), A4 print poster
+  (`@page A4`, logo, title, large QR, «QR-кодты сканерлеп, викторинаға
+  қатысыңыз!»).
+
+## Phase 7 — Live mode ✅
+* Done: host screen (lobby with big QR + live joined count, start, per-question
+  server-timed countdown, live answered count, reveal with per-option
+  distribution, leaderboard between questions, end → final podium, new
+  session, fullscreen). Participants follow `quiz_sessions` through Realtime
+  `postgres_changes` (no answers on the wire — every event triggers a
+  per-participant RPC refetch with 0–500 ms jitter) + polling fallback
+  (3 s disconnected / 15 s connected) + refetch on visibility/online.
+  Join routes into live automatically if a session opened after page load.
+* Tests: `tests/e2e/live.mjs` — host + 2 phones, full 5-question quiz,
+  reloads in lobby and mid-question, Realtime connection asserted.

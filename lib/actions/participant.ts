@@ -19,7 +19,7 @@ async function clientWithUser() {
   return { supabase, error: null };
 }
 
-export async function joinQuiz(input: { slug: string; name: string; pin?: string | null }): Promise<ActionResult<{ participantId: string }>> {
+export async function joinQuiz(input: { slug: string; name: string; pin?: string | null }): Promise<ActionResult<{ participantId: string; sessionId: string | null }>> {
   const parsed = joinSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? kk.errors.validation };
   const { supabase, error: authError } = await clientWithUser();
@@ -30,7 +30,9 @@ export async function joinQuiz(input: { slug: string; name: string; pin?: string
     p_pin: parsed.data.pin as string,
   });
   if (error || !data) return { ok: false, error: rpcErrorMessage(error) };
-  return { ok: true, data: { participantId: data } };
+  // the session may have opened after the landing page loaded
+  const { data: row } = await supabase.from("participants").select("session_id").eq("id", data).maybeSingle();
+  return { ok: true, data: { participantId: data, sessionId: row?.session_id ?? null } };
 }
 
 export async function getParticipantState(participantId: string): Promise<ActionResult<ParticipantState>> {
