@@ -300,6 +300,9 @@ isOneToOne: false
 "current_role_name":
 { Args: Record<PropertyKey, never>; Returns: Database["public"]['Enums']["user_role"]
                            },
+"duplicate_question":
+{ Args: { "p_question_id": string }; Returns: string
+                           },
 "get_leaderboard":
 { Args: { "p_limit"?: number,"p_session_id"?: string,"p_slug": string }; Returns: {
               "accuracy": number,"correct_count": number,"display_name": string,"is_me": boolean,"rank": number,"score": number,"total_questions": number,"total_time_ms": number
@@ -340,6 +343,9 @@ isOneToOne: false
               "category": string,"description": string,"ends_at": string,"question_total": number,"slug": string,"starts_at": string,"title": string
             }[]
                            },
+"move_question":
+{ Args: { "p_direction": number,"p_question_id": string }; Returns: undefined
+                           },
 "normalize_answer":
 { Args: { "p_text": string }; Returns: string
                            },
@@ -348,6 +354,9 @@ isOneToOne: false
                            },
 "promote_super_admin":
 { Args: { "p_email": string }; Returns: undefined
+                           },
+"save_question":
+{ Args: { "p_payload": Json,"p_question_id": string }; Returns: string
                            },
 "set_quiz_pin":
 { Args: { "p_pin": string,"p_quiz_id": string }; Returns: undefined

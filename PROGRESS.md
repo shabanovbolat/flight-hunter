@@ -79,3 +79,12 @@ state through the RPC (plus a slow polling fallback). Timers use server time
   dashboard cards (quizzes, participants, active, completed, average score,
   recent activity) via `admin_dashboard_stats()` (security invoker → RLS).
 * Remaining: quiz/question CRUD (Phase 4).
+
+## Phase 4 — Quiz + question CRUD ✅
+* Done: quiz list/create/edit (all settings incl. PIN → bcrypt via
+  `set_quiz_pin`, cover upload to Storage, slug generator, local→UTC date
+  handling), publish/unpublish/archive/delete, question editor for all four
+  types with Arabic RTL inputs, option editor, accepted answers, optional
+  Islamic reference block (shown verbatim), reorder/duplicate/delete,
+  question bank with search + type filter. Question + options are saved
+  atomically by `save_question()` (security invoker → RLS applies).
